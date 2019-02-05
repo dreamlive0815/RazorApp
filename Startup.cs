@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using MyHttp;
+
 namespace RazorTest
 {
     public class Startup
@@ -33,6 +35,7 @@ namespace RazorTest
             });
 
             services.AddHttpClient();
+            services.AddScoped<IHttpClient, MyHttpClient>();
 
             services.AddSession();
 

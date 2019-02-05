@@ -9,9 +9,9 @@ using Microsoft.Extensions.Http;
 
 using MyHttp;
 
-namespace Controllers.Controllers
+namespace Controllers
 {
-    [Route("api/[controller]")]
+    [Route("/")]
     [ApiController]
     public class TestController : Controller
     {
@@ -27,14 +27,7 @@ namespace Controllers.Controllers
         [HttpGet]
         public string F()
         {
-            
-            
-            var client = new MyHttpClient();
-            HttpClientInitializer.Chrome(client);
-            //client.Proxy = new FiddlerProxy();
-            var s = client.GetString(client.BuildRequest("https://www.baidu.com"));
-
-            return s;
+            return "HHH";
         }
     }
 }

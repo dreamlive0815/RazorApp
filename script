@@ -1,0 +1,9 @@
+
+vi /etc/systemd/system/razorapp.service
+systemctl daemon-reload
+
+dotnet publish --configuration Release
+
+git fetch origin master
+git log -p master.. origin/master
+git merge origin/master
