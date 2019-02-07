@@ -14,6 +14,11 @@ namespace Crawler.Girl
     {
         public static string BaseUri { get { return "https://www.nvshens.com"; } }
 
+        public static string GetCoverUrl(string girlId, string albumId)
+        {
+            return $"https://t1.onvshen.com:85/gallery/{girlId}/{albumId}/cover/0.jpg";
+        }
+
         public static string GetImageUrl(string girlId, string albumId, int index = 0, string extension = "jpg")
         {
             if (index < 0) index = 0;
@@ -86,6 +91,7 @@ namespace Crawler.Girl
 
             return new Album() {
                 Count = int.Parse(match.Groups[1].Value),
+                Cover = GetCoverUrl(srcMatch.Groups[1].Value, albumId),
                 CreateTime = match.Groups[2].Value,
                 Description = desc,
                 Hits = match.Groups[3].Value,
@@ -99,7 +105,7 @@ namespace Crawler.Girl
         public List<string> GetAlbumImageUrls(Album album)
         {
             var list = new List<string>();
-            for (int i = 0; i < album.Count; ++i) {
+            for (int i = 0; i < album.Count; i++) {
                 list.Add(GetImageUrl(album.GirlId, album.Id, i));
             }
             return list;

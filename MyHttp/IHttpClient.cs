@@ -130,6 +130,7 @@ namespace MyHttp
 
                 if(request.Method == HttpMethod.Post && request.Content != null)
                 {
+                    webReq.Method = "POST";
                     var t = request.Content.ReadAsStreamAsync();
                     t.Wait();
                     using(var reqS = t.Result)

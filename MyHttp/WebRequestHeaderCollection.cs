@@ -62,7 +62,7 @@ namespace MyHttp
             var d = new Dictionary<string, string>();
             foreach(var header in _headers.AllKeys)
             {
-                d.Add(header, string.Join(";", _headers[header]));
+                d.Add(header, _headers[header]);
             }
             return d;
         }

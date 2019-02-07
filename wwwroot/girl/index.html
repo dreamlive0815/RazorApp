@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="never">
+
+    <title>ZNGirls</title>
+
+    <!-- Styles -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="">
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+
+                    <!-- Collapsed Hamburger -->
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                        <span class="sr-only">Toggle Navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <!-- Branding Image -->
+                    <a class="navbar-brand" href="javascript:void(0);">
+                        {{ headText }}
+                    </a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="app-navbar-collapse">
+                    <!-- Left Side Of Navbar -->
+                    <!--ul class="nav navbar-nav">
+                        &nbsp;
+                    </ul-->
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li v-for="nav in navs" class="nav-item">
+                            <a class="nav-link text-dark" :href="nav.link">{{ nav.name }}</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+
+        <button class="btn btn-primary btn-block" @click="switchAutoSlide">自动翻页({{ autoSlideStatus }})</button>
+
+        <carousel id="myCarousel" ref="carousel" :imgs="imgs" seen="true"></carousel>
+        <modal id="confirmModal" ref="confirm" @onconfirm=""></modal>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/config.js"></script>
+    <script src="./js/jquery-3.3.1.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/vue-resource.min.js"></script>
+    <script src="./js/vue-components/modal.js"></script>
+    <script src="./js/vue-components/carousel.js"></script>
+
+    <script>
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            autoSlideStatus: '关',
+            headText: defaultHeadText,
+            imgs: [
+                /*
+                { src: './img/0.jpg', title: 0 },
+                { src: './img/1.jpg', title: 1 },
+                { src: './img/2.jpg', title: 2 },
+                */
+            ],
+            navs: [
+                { name: 'Home', link: '/' },
+                { name: 'Google', link: '/google' },
+                { name: 'Taobao', link: '/taobao' }
+            ],
+        },
+        methods: {
+            switchAutoSlide: function() {
+                var carousel = this.$refs.carousel;
+                carousel.switchAutoSilde();
+                this.autoSlideStatus = carousel.autoSlide ? '开' : '关';
+            }
+        }
+    });
+
+    var confirm = app.$refs.confirm;
+    var carousel = app.$refs.carousel;
+
+    setCarouselSlideHandler('myCarousel');
+    </script>
+
+</body>
+</html>
