@@ -1,3 +1,9 @@
+/*
+[外部依赖]
+bootstrap
+[事件]
+onconfirm:点击确认之后触发
+*/
 
 Vue.component('modal', {
     props: {

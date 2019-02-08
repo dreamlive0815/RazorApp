@@ -1,3 +1,11 @@
+/*
+[外部依赖]
+bootstrap
+config: Object
+[事件]
+onslidestart:过渡动画开始
+onslideend:过渡动画结束
+*/
 
 Vue.component('carousel', {
     props: {
@@ -10,10 +18,12 @@ Vue.component('carousel', {
             required: true
         },
         interval: Number,
-        seen: Boolean,
+        visible: Boolean,
     },
     template: '\
-    <div class="carousel slide" v-if="seen" :id="id" @dblclick="dblclickHandler">\
+<div :style="{display:visible ? \'block\' : \'none\' }">\
+    <div class="carousel slide" :id="id" @dblclick="dblclickHandler">\
+        <button class="btn btn-primary btn-block" @click="switchAutoSilde">自动翻页({{ autoSlide ? \'开\' : \'关\' }})</button>\
         <ol class="carousel-indicators">\
             <li v-for="(img,index) in imgs" :data-target="\'#\' + id" :data-slide-to="index" :class="{active:index==0}"></li>\
         </ol>\
@@ -31,7 +41,8 @@ Vue.component('carousel', {
             <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>\
             <span class="sr-only">Next</span>\
         </a>\
-    </div>',
+    </div>\
+</div>',
     data: function() {
         return {
             autoSlide: false
@@ -43,7 +54,7 @@ Vue.component('carousel', {
         },
         switchAutoSilde: function() {
             if(!this.autoSlide)
-                this.autoSlideOn(2000);
+                this.autoSlideOn(config.defaultAutoSlideInterval);
             else
                 this.autoSlideOff();
             this.autoSlide = !this.autoSlide;
@@ -61,13 +72,14 @@ Vue.component('carousel', {
             console.log('autoSlideOff');
         }
     },
+    mounted: function() {
+        this.$nextTick(function() {
+            var that = this;
+            $('#' + this.id).on('slide.bs.carousel', function() {
+                that.$emit('onslidestart');
+            }).on('slid.bs.carousel', function() {
+                that.$emit('onslideend');
+            });
+        });
+    },
 })
-
-var setCarouselSlideHandler = function(id) {
-    $('#' + id).on('slide.bs.carousel', function() {
-        app.headText = '翻页中...';
-    });
-    $('#' + id).on('slid.bs.carousel', function() {
-        app.headText = defaultHeadText;
-    });
-}

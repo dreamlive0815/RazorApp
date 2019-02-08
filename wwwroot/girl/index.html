@@ -10,6 +10,7 @@
 
     <!-- Styles -->
     <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/app.css" rel="stylesheet">
 </head>
 <body>
     <div id="app" class="">
@@ -38,8 +39,8 @@
                     </ul-->
 
                     <ul class="nav navbar-nav navbar-right">
-                        <li v-for="nav in navs" class="nav-item">
-                            <a class="nav-link text-dark" :href="nav.link">{{ nav.name }}</a>
+                        <li v-for="(nav,index) in navs" class="nav-item">
+                            <a class="nav-link text-dark" :href="nav.link" @click="nav.onclick(index)">{{ nav.name }}</a>
                         </li>
                     </ul>
 
@@ -47,10 +48,10 @@
             </div>
         </nav>
 
-        <button class="btn btn-primary btn-block" @click="switchAutoSlide">自动翻页({{ autoSlideStatus }})</button>
+        <girlcontainer :girl="girl" :list="list" :visible="containerVisible"></girlcontainer>
 
-        <carousel id="myCarousel" ref="carousel" :imgs="imgs" seen="true"></carousel>
-        <modal id="confirmModal" ref="confirm" @onconfirm=""></modal>
+        <carousel id="myCarousel" ref="carousel" :imgs="imgs" :visible="carouselVisible" @onslidestart="slidestart" @onslideend="slideend"></carousel>
+        <modal id="confirmModal" ref="confirm" @onconfirm="confirm"></modal>
     </div>
 
     <!-- Scripts -->
@@ -61,40 +62,49 @@
     <script src="./js/vue-resource.min.js"></script>
     <script src="./js/vue-components/modal.js"></script>
     <script src="./js/vue-components/carousel.js"></script>
+    <script src="./js/vue-components/girlcontainer.js"></script>
+    <script src="./js/util.js"></script>
 
     <script>
-
     var app = new Vue({
         el: '#app',
         data: {
-            autoSlideStatus: '关',
-            headText: defaultHeadText,
+            headText: config.defaultHeadText,
             imgs: [
-                /*
+                
                 { src: './img/0.jpg', title: 0 },
                 { src: './img/1.jpg', title: 1 },
                 { src: './img/2.jpg', title: 2 },
-                */
+                { src: './img/3.jpg', title: 3 },
+                
             ],
             navs: [
                 { name: 'Home', link: '/' },
                 { name: 'Google', link: '/google' },
                 { name: 'Taobao', link: '/taobao' }
             ],
+            containerVisible: true,
+            carouselVisible: false,
+            girl: {"age":"22 (属鼠)","avatar":"https://img.onvshen.com:85/girl/22162/22162.jpg","birthday":"1997-01-07","description":"杨晨晨，昵称sugar小甜心CC，内地平面模特，秀人网当红人气麻豆，武汉星之路文化艺术发展有限公司模特，微博语录：这个博主可爱到爆炸❤✨，不要轻易撩。","height":"164","hobby":"旅游、宠物、音乐","horoscope":"魔羯座","id":"22162","job":"模特","name":"杨晨晨(sugar小甜心CC , sugar)","origin":"中国 湖北宜昌","size":"B88 W65 H89","score":"9.8","weight":"43 KG"},
+            list: [
+                { src: './img/0.jpg', title: 0 },
+                { src: './img/1.jpg', title: 1 },
+                { src: './img/2.jpg', title: 2 },
+                { src: './img/3.jpg', title: 3 },
+            ]
         },
         methods: {
-            switchAutoSlide: function() {
-                var carousel = this.$refs.carousel;
-                carousel.switchAutoSilde();
-                this.autoSlideStatus = carousel.autoSlide ? '开' : '关';
+            confirm: function() {
+
+            },
+            slidestart: function() {
+                app.headText = '翻页中...';
+            },
+            slideend: function() {
+                app.headText = config.defaultHeadText;
             }
         }
     });
-
-    var confirm = app.$refs.confirm;
-    var carousel = app.$refs.carousel;
-
-    setCarouselSlideHandler('myCarousel');
     </script>
 
 </body>
