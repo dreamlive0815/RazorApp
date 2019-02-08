@@ -57,8 +57,27 @@ namespace Controllers
             });
         }
 
-        [HttpGet("girl/{girlId:int}")]
+        [HttpGet("profile/{girlId:int}")]
         public JsonResult GirlProfile(int girlId)
+        {
+            var profile = girl.GetGirlProfile(girlId.ToString());
+            profile.Avatar = GetFinalImageUrl(profile.Avatar);
+
+            return Json(profile);
+        }
+
+        [HttpGet("albumlist/{girlId:int}")]
+        public JsonResult GirlAlbums(int girlId)
+        {
+            var albums = girl.GetAlbums(girlId.ToString());
+            albums.ForEach(a => {
+                a.Cover = GetFinalImageUrl(a.Cover);
+            });
+            return Json(albums);
+        }
+
+        [HttpGet("girl/{girlId:int}")]
+        public JsonResult GirlProfileAndAlbums(int girlId)
         {
             var tasks = new Task[2];
             var factory = Task.Factory;

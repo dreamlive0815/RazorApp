@@ -46,7 +46,7 @@ Vue.component('girlcontainer', {
 </div>',
     data: function() {
         return {
-            moreVisible: true
+            moreVisible: false
         }
     },
     computed: {
