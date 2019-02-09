@@ -28,14 +28,22 @@ namespace Controllers
             girl = new Girl(_client);
         }
 
+        [HttpGet]
+        public RedirectResult Index()
+        {
+            return Redirect("/girl/gallery.html");
+        }
+
         [HttpGet("album/{albumId:int}")]
         public JsonResult AlbumInfo(int albumId)
         {
             var album = girl.GetAlbumInfo(albumId.ToString());
+            album.Cover = GetFinalImageUrl(album.Cover);
             var urls = girl.GetAlbumImageUrls(album);
-            urls.ForEach(u => {
-                u = GetFinalImageUrl(u);
-            });
+            for(int i = 0; i < urls.Count; i++) {
+                urls[i] = GetFinalImageUrl(urls[i]);
+            }
+
             return Json(new {
                 Album = album,
                 Urls = urls,
@@ -73,6 +81,7 @@ namespace Controllers
             albums.ForEach(a => {
                 a.Cover = GetFinalImageUrl(a.Cover);
             });
+
             return Json(albums);
         }
 
@@ -135,6 +144,7 @@ namespace Controllers
         private string GetFinalImageUrl(string url)
         {
             return url;
+            //return "/girl/imagewithurl/" + url;
         }
     }
 }

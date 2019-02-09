@@ -19,17 +19,18 @@ Vue.component('carousel', {
         },
         interval: Number,
         visible: Boolean,
+        disableindicator: Boolean,
     },
     template: '\
 <div :style="{display:visible ? \'block\' : \'none\' }">\
     <div class="carousel slide" :id="id" @dblclick="dblclickHandler">\
         <button class="btn btn-primary btn-block" @click="switchAutoSilde">自动翻页({{ autoSlide ? \'开\' : \'关\' }})</button>\
-        <ol class="carousel-indicators">\
+        <ol v-if="!disableindicator" class="carousel-indicators">\
             <li v-for="(img,index) in imgs" :data-target="\'#\' + id" :data-slide-to="index" :class="{active:index==0}"></li>\
         </ol>\
         <div class="carousel-inner">\
             <div v-for="(img,index) in imgs" :class="{item:true,active:index==0}">\
-                <img class="carousel-inner" :src="img.src">\
+                <a :href="img.href ? img.href : \'javascript:void(0)\' " target="_blank"><img class="carousel-inner" :src="img.src"></a>\
                 <div class="carousel-caption">{{ img.title }}[{{ index + 1 }}/{{ imgs.length }}]</div>\
             </div>\
         </div>\

@@ -165,25 +165,35 @@ namespace Crawler.Girl
                 throw new Exception($"ID为{girlId}的模特不存在");
             var name = infoBox.SelectSingleNodeHtml(".//div[contains(@class, 'div_h1')]/h1");
             var avatar = infoBox.SelectSingleNodeAttr(".//div[@class='infoleft_imgdiv']//img", "src");
-            var infos = infoBox.SelectNodesHtml(".//div[@class='infodiv']//tr/td[2]");
+            var infos = infoBox.SelectNodesHtml(".//div[@class='infodiv']//tr/td");
             var score = infoBox.SelectSingleNodeHtml(".//span[@id='span_score']");
             var desc = infoBox.SelectSingleNodeHtml("//div[@class='infocontent']/p");
+
+            var dic = new Dictionary<string,string>();
+            for(int i = 0; i < infos.Count; i += 2) {
+                dic.Add(infos[i], infos[i + 1]);
+            }
+            var getInfo = new Func<string, string>(k => {
+                var key = $"{k}：";
+                if(!dic.ContainsKey(key)) return null;
+                return dic[key];
+            });
             
             return new GirlProfile() {
-                Age = infos[0],
+                Age = getInfo("年 龄"),
                 Avatar = avatar,
-                Birthday = infos[1],
+                Birthday = getInfo("生 日"),
                 Description = desc,
-                Height = infos[3],
-                Hobby = infos[8],
-                Horoscope = infos[2],
+                Height = getInfo("身 高"),
+                Hobby = getInfo("兴 趣"),
+                Horoscope = getInfo("星 座"),
                 Id = girlId,
-                Job = infos[7],
+                Job = getInfo("职 业"),
                 Name = name,
-                Origin = infos[6],
-                Size = infos[5],
+                Origin = getInfo("出 生"),
+                Size = getInfo("三 围"),
                 Score = score,
-                Weight = infos[4],
+                Weight = getInfo("体 重"),
             };
         }
     }

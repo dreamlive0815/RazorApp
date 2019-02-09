@@ -18,12 +18,13 @@ Vue.component('girlcontainer', {
             required: true
         },
         visible: Boolean,
+        disableprofile: Boolean,
     },
     template: '\
-<div :style="{display:visible ? \'block\' : \'none\' }">\
-    <div class="thumbnail">\
+<div class="container" :style="{display:visible ? \'block\' : \'none\' }">\
+    <div v-if="!disableprofile" class="thumbnail">\
         <img class="img-responsive" :src="girl.avatar"></img>\
-        <p class="centerp"><a :href="albumsPageUrl" target="_blank">{{ girl.name }}[{{ girl.score }}]</a></p>\
+        <p class="centerp"><a :href="albumsPageUrl" target="_blank">{{ girl.name }}{{ girl.score ? \'[\' + girl.score + \']\' : \'\' }}</a></p>\
         <button class="btn btn-primary btn-block" @click="switchMore">更多</button>\
         <div :style="{display:moreVisible ? \'block\' : \'none\' }">\
             <table class="table table-striped" style="margin:0;">\
@@ -51,6 +52,9 @@ Vue.component('girlcontainer', {
     },
     computed: {
         albumsPageUrl: function() {
+            //如果已经是当前页面则设置链接无效
+            if(window.location.href.indexOf(config.getAlbumsPageUrl(this.girl.id).substr(1)) != -1)
+                return 'javascript:void(0)';
             return config.getAlbumsPageUrl(this.girl.id);
         }
     },

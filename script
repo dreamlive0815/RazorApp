@@ -7,3 +7,12 @@ dotnet publish --configuration Release
 git fetch origin master
 git log -p master.. origin/master
 git merge origin/master
+
+//从远程的origin仓库的master分支下载到本地并新建一个分支temp
+git fetch origin master:temp 
+//比较master分支和temp分支的不同
+git diff temp
+//合并temp分支到master分支
+git merge temp
+//删除temp
+git branch -d temp
