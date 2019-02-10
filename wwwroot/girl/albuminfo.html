@@ -80,7 +80,11 @@ window.onload = function() {
     });
 
     var errorHandler = function(res) {
-        hiddenDiv.$refs.confirm.show(res.statusText, 'URL=' + res.url);
+        var newline = '<br />';
+        var title = '[' + res.status + ']' + res.statusText;
+        var body = 'URL=' + res.url + newline;
+        body += 'Message=' + res.body.Message;
+        hiddenDiv.$refs.confirm.show(title, body);
     };
     var params = getQueryParams();
     var albumId = params.albumId;

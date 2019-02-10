@@ -13,12 +13,12 @@ namespace Controllers
 {
     [Route("/")]
     [ApiController]
-    public class TestController : Controller
+    public class IndexController : Controller
     {
 
         IHttpClientFactory _factory;
 
-        public TestController(IHttpClientFactory clientFactory)
+        public IndexController(IHttpClientFactory clientFactory)
         {
             _factory = clientFactory;
             
