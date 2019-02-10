@@ -76,6 +76,8 @@
     <script src="./js/util.js"></script>
 
     <script>
+window.onload = function() {
+
     var hiddenDiv = new Vue({
         el: '#hiddenDiv',
         methods: {
@@ -154,9 +156,12 @@
         created: function() {
             this.init();
         }
-    });
-
+    }); 
     if(pageId == 1) app.preDisabled = true;
+    window.app = app;
+    window.pageId = pageId;
+
+}
     </script>
 
 </body>

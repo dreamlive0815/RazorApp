@@ -70,6 +70,8 @@
     <script src="./js/util.js"></script>
 
     <script>
+window.onload = function() {
+
     var hiddenDiv = new Vue({
         el: '#hiddenDiv',
         methods: {
@@ -108,7 +110,7 @@
                     var imgs = [];
                     var list = [];
                     res.body.forEach(function(item) {
-                        imgs.push({ src: item.cover, title: item.title });
+                        imgs.push({ src: item.cover, title: item.title, href: config.getAlbumInfoPageUrl(item.id) });
                         list.push({ src: item.cover, title: item.title, href: config.getAlbumInfoPageUrl(item.id) });
                     });
                     this.list = list;
@@ -137,6 +139,10 @@
             this.init();
         }
     });
+    window.app = app;
+    window.girlId = girlId;
+
+}
     </script>
 
 </body>
