@@ -37,7 +37,9 @@ namespace RazorTest
             services.AddHttpClient();
             services.AddScoped<IHttpClient, MyHttpClient>();
 
-            services.AddSession();
+            services.AddSession(options => {
+
+            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -65,9 +67,8 @@ namespace RazorTest
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-
             //app.UseHttpsRedirection();
-            
+
             app.UseStaticFiles();
 
             app.UseCookiePolicy();

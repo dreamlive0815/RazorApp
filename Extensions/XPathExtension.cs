@@ -29,8 +29,8 @@ namespace Extensions
         {
             var nodes = XPath(s, xpath);
             var list = new List<string>();
-            if(nodes == null) return list;
-            foreach(var node in nodes) {
+            if (nodes == null) return list;
+            foreach (var node in nodes) {
                 list.Add(node.InnerHtml);
             }
             return list;
@@ -48,20 +48,20 @@ namespace Extensions
     {
         public static string SelectSingleNodeAttr(this HtmlNode node, string xpath, string attribute)
         {
-            return node.SelectSingleNode(xpath)?.GetAttributeValue(attribute, null);
+            return node?.SelectSingleNode(xpath)?.GetAttributeValue(attribute, null);
         }
 
         public static string SelectSingleNodeHtml(this HtmlNode node, string xpath)
         {
-            return node.SelectSingleNode(xpath)?.InnerHtml;
+            return node?.SelectSingleNode(xpath)?.InnerHtml;
         }
 
         public static List<string> SelectNodesHtml(this HtmlNode node, string xpath)
         {
-            var nodes = node.SelectNodes(xpath);
+            var nodes = node?.SelectNodes(xpath);
             var list = new List<string>();
-            if(nodes == null) return list;
-            foreach(var n in nodes) {
+            if (nodes == null) return list;
+            foreach (var n in nodes) {
                 list.Add(n.InnerHtml);
             }
             return list;

@@ -48,7 +48,7 @@ namespace MyHttp
         /// 设置POST时默认的Content-Type
         /// </summary>
         /// <value></value>
-        public string DefaultContentType { get; set; }
+        public string DefaultContentType { get; set; } = "application/x-www-form-urlencoded";
 
         public static string BuildQueryString(Dictionary<string, object> formParams)
         {
@@ -104,6 +104,7 @@ namespace MyHttp
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             var content = new StringContent(body);
             if(DefaultContentType != null) content.Headers.ContentType = MediaTypeHeaderValue.Parse(DefaultContentType);
+            request.Content = content;
             return request;
         }
 
@@ -123,6 +124,7 @@ namespace MyHttp
             BeforeSendRequest?.Invoke(this, request);
             try {
                 var webReq = WebRequest.Create(request.RequestUri.OriginalString) as HttpWebRequest;
+                webReq.CookieContainer = Cookies;
                 webReq.Proxy = Proxy;
                 var c = new WebRequestHeaderCollection(webReq, webReq.Headers);
                 var d = GetMergedHeaderDictionary(request);
@@ -131,6 +133,7 @@ namespace MyHttp
                 if(request.Method == HttpMethod.Post && request.Content != null)
                 {
                     webReq.Method = "POST";
+                    webReq.ContentType = DefaultContentType;
                     var t = request.Content.ReadAsStreamAsync();
                     t.Wait();
                     using(var reqS = t.Result)
@@ -157,6 +160,18 @@ namespace MyHttp
             return Task.Run(() => {
                 DownloadFile(request, filePath);
             });
+        }
+
+        public string GetCookies(string uri)
+        {
+            var cookies = Cookies.GetCookies(new Uri(uri));
+            var sb = new StringBuilder();
+            for (var i = 0; i < cookies.Count; i++) {
+                var cookie = cookies[i];
+                if (i > 0) sb.Append(";");
+                sb.Append(cookie.Name); sb.Append("="); sb.Append(cookie.Value);
+            }
+            return sb.ToString();
         }
 
         public Dictionary<string, string> GetMergedHeaderDictionary(HttpRequestMessage request)
