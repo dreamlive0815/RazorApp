@@ -12,6 +12,7 @@ using Microsoft.Extensions.Http;
 using Crawler.Girl;
 using Crawler.Girl.Model;
 using MyHttp;
+using Newtonsoft.Json;
 
 namespace Controllers
 {
@@ -31,7 +32,7 @@ namespace Controllers
         [HttpGet]
         public RedirectResult Index()
         {
-            return Redirect("/girl/gallery.html");
+            return Redirect("/girl/index.html");
         }
 
         [HttpGet("album/{albumId:int}")]
@@ -48,6 +49,30 @@ namespace Controllers
                 Album = album,
                 Urls = urls,
             });
+        }
+
+        [HttpGet("bookmarkedgirls")]
+        public JsonResult BookmarkedGirls()
+        {
+            var girls = new List<GirlProfile>() {
+                new GirlProfile() {
+                    Avatar = "https://img.onvshen.com:85/girl/22162/22162.jpg",
+                    Id = "22162",
+                    Name = "杨晨晨(sugar小甜心CC , sugar)",
+                },
+                new GirlProfile() {
+                    Avatar = "https://img.onvshen.com:85/girl/19705/19705.jpg",
+                    Id = "19705",
+                    Name = "刘飞儿",
+                },
+                new GirlProfile() {
+                    Avatar = "https://img.onvshen.com:85/girl/21501/21501.jpg",
+                    Id = "21501",
+                    Name = "夏美酱",
+                },
+            };
+
+            return Json(girls);
         }
 
         [HttpGet("gallery/{index:int=1}")]
