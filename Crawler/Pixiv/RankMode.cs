@@ -39,6 +39,7 @@ namespace Crawler.Pixiv
         {
             switch (mode)
             {
+                case RankMode.Daily: return "daily";
                 case RankMode.DailyR18: return "daily_r18";
                 case RankMode.Female: return "female";
                 case RankMode.FemaleR18: return "female_r18";
@@ -49,6 +50,7 @@ namespace Crawler.Pixiv
                 case RankMode.Rookie: return "rookie";
                 case RankMode.Weekly: return "weekly";
                 case RankMode.WeeklyR18: return "weekly_r18";
+                //Daily
                 default: return "daily";
             }
         }

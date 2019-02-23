@@ -50,6 +50,8 @@ namespace MyHttp
         /// <value></value>
         public string DefaultContentType { get; set; } = "application/x-www-form-urlencoded";
 
+        public bool ThrowExceptionWhenUnSuccessfulStatusCode { get; set; } = true;
+
         public static string BuildQueryString(Dictionary<string, object> formParams)
         {
             if(formParams == null) return "";
@@ -223,12 +225,31 @@ namespace MyHttp
         public HttpResponseMessage Send(HttpRequestMessage request)
         {
             BeforeSendRequest?.Invoke(this, request);
-            return SendProto(request);
+            var response = SendProto(request);
+            if (!response.IsSuccessStatusCode && ThrowExceptionWhenUnSuccessfulStatusCode) {
+                var e = new Exception(response.ReasonPhrase);
+                OnError?.Invoke(this, e);
+                throw e;
+            }
+            return response;
         }
 
         public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
             BeforeSendRequest?.Invoke(this, request);
+            if (ThrowExceptionWhenUnSuccessfulStatusCode) {
+                return Task.Run<HttpResponseMessage>(() => {
+                    var t = SendAsyncProto(request);
+                    t.Wait();
+                    var response = t.Result;
+                    if (!response.IsSuccessStatusCode) {
+                        var e = new Exception(response.ReasonPhrase);
+                        OnError?.Invoke(this, e);
+                        throw e;
+                    }
+                    return response;
+                });
+            }
             return SendAsyncProto(request);
         }
 
