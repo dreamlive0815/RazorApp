@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="never">
+
+    <title>Pixiv</title>
+
+    <!-- Styles -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div id="hiddenDiv">
+        <modal id="confirmModal" ref="confirm" @onconfirm="confirm"></modal>
+    </div>
+    <div id="app" class="">
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+
+                    <!-- Collapsed Hamburger -->
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                        <span class="sr-only">Toggle Navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <!-- Branding Image -->
+                    <a class="navbar-brand" href="javascript:void(0);">
+                        {{ headText }}
+                    </a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="app-navbar-collapse">
+                    <!-- Left Side Of Navbar -->
+                    <!--ul class="nav navbar-nav">
+                        &nbsp;
+                    </ul-->
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li v-for="(nav,index) in navs" class="nav-item">
+                            <a class="nav-link text-dark" :href="nav.link" @click="nav.onclick(index)">{{ nav.name }}</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+
+        <carousel id="myCarousel" ref="carousel" :imgs="imgs" :visible="carouselVisible" @onslidestart="slidestart" @onslideend="slideend"></carousel>
+        
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/config.js"></script>
+    <script src="./js/config-carousel-extend.js"></script>
+    <script src="./js/jquery-3.3.1.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/vue-resource.min.js"></script>
+    <script src="./js/vue-components/modal.js"></script>
+    <script src="./js/vue-components/carousel.js"></script>
+    <script src="./js/util.js"></script>
+    <script src="./js/auth.js"></script>
+
+    <script>
+window.onload = function() {
+    redirectToLoginPageIfNoCookies();
+
+    var hiddenDiv = new Vue({
+        el: '#hiddenDiv',
+        methods: {
+            confirm: function() {
+            }
+        },
+    });
+
+    var ajaxErrorHandler = function(res) {
+        redirectToLoginPageIfCookiesExpired(res);
+        var newline = '<br />';
+        var title = '[' + res.status + ']' + res.statusText;
+        var body = 'URL=' + res.url + newline;
+        body += 'Message=' + res.body.Message;
+        hiddenDiv.$refs.confirm.show(title, body);
+    };
+    
+    var app = new Vue({
+        el: '#app',
+        data: {
+            headText: config.defaultHeadText,
+            navs: config.defaultNavs,
+            carouselVisible: false,
+            list: [
+            ],
+            imgs: [
+            ],
+        },
+        methods: {
+            init: function() {
+                this.$http.post("/pixiv", getBasePostParams(), {emulateJSON:true}).then(function(res) {
+                    console.log(res);
+                }, ajaxErrorHandler);
+            },
+            slidestart: function() {
+                app.headText = '翻页中...';
+            },
+            slideend: function() {
+                app.headText = config.defaultHeadText;
+            }
+        },
+        mounted: function() {
+            this.$nextTick(function() {
+                this.init();
+            });
+        },
+    });
+    window.app = app;
+
+}
+    </script>
+
+</body>
+</html>

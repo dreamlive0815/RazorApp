@@ -771,6 +771,8 @@ namespace Crawler.Pixiv
 
         public void BookmarkIllustration(string illustId)
         {
+            AssertLoggedIn();
+
             var s = _client.GetString(GetBookmarkIllustrationRequest(illustId));
 
             var obj = JObject.Parse(s);
@@ -795,6 +797,8 @@ namespace Crawler.Pixiv
 
         public void UnBookmarkIllustration(string bookId, bool isPublic = true)
         {
+            AssertLoggedIn();
+            
             var s = _client.GetString(GetUnBookmarkIllustrationRequest(bookId, isPublic));
 
             var match = Regex.Match(s, "<p class=\"error-message\">(.+?)</p>");
@@ -828,6 +832,8 @@ namespace Crawler.Pixiv
         /// <returns>返回刚刚的评论</returns>
         public Comment Comment(string illustId, string authorId, string text)
         {
+            AssertLoggedIn();
+            
             var s = _client.GetString(GetCommentRequest(illustId, authorId, text));
 
             var obj = JObject.Parse(s);
@@ -880,6 +886,8 @@ namespace Crawler.Pixiv
         /// <returns>返回刚刚的评论</returns>
         public Comment CommentEmoji(string illustId, string authorId, string emojiId)
         {
+            AssertLoggedIn();
+            
             var s = _client.GetString(GetCommentEmojiRequest(illustId, authorId, emojiId));
 
             var obj = JObject.Parse(s);
@@ -923,6 +931,8 @@ namespace Crawler.Pixiv
         /// <param name="commentId"></param>
         public void RemoveMyComment(string illustId, string commentId)
         {
+            AssertLoggedIn();
+            
             var s = _client.GetString(GetRemoveMyCommentRequest(illustId, commentId));
 
             var obj = JObject.Parse(s);
@@ -947,6 +957,8 @@ namespace Crawler.Pixiv
 
         public void FollowUser(string userId)
         {
+            AssertLoggedIn();
+            
             var s = _client.GetString(GetFollowUserRequest(userId));
 
             var match = Regex.Match(s, "<p class=\"error-message\">(.+?)</p>");
@@ -971,6 +983,8 @@ namespace Crawler.Pixiv
         /// <param name="userId"></param>
         public void UnFollowUser(string userId)
         {
+            AssertLoggedIn();
+            
             var s = _client.GetString(GetUnFollowUserRequest(userId));
 
         }
@@ -988,6 +1002,8 @@ namespace Crawler.Pixiv
 
         public void LikeIllustration(string illustId)
         {
+            AssertLoggedIn();
+            
             var s = _client.GetString(GetLikeIllustrationRequest(illustId));
 
             var obj = JObject.Parse(s);

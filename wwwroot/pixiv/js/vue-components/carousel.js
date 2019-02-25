@@ -1,7 +1,8 @@
 /*
+幻灯片播放图片
 [外部依赖]
 bootstrap
-config: Object
+config.js
 [事件]
 onslidestart:过渡动画开始
 onslideend:过渡动画结束
@@ -19,13 +20,14 @@ Vue.component('carousel', {
         },
         interval: Number,
         visible: Boolean,
-        disableindicator: Boolean,
+        //下方指示器 快速定位到指定页
+        enableindicator: Boolean,
     },
     template: '\
 <div :style="{display:visible ? \'block\' : \'none\' }">\
     <div class="carousel slide" :id="id" @dblclick="dblclickHandler">\
         <button class="btn btn-primary btn-block" @click="switchAutoSilde">自动翻页({{ autoSlide ? \'开\' : \'关\' }})</button>\
-        <ol v-if="!disableindicator" class="carousel-indicators">\
+        <ol v-if="enableindicator" class="carousel-indicators">\
             <li v-for="(img,index) in imgs" :data-target="\'#\' + id" :data-slide-to="index" :class="{active:index==0}"></li>\
         </ol>\
         <div class="carousel-inner">\

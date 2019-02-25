@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="never">
+
+    <title>Pixiv</title>
+
+    <!-- Styles -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div id="hiddenDiv">
+        <modal id="confirmModal" ref="confirm" @onconfirm="confirm"></modal>
+    </div>
+    <div id="app" class="">
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+
+                    <!-- Collapsed Hamburger -->
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                        <span class="sr-only">Toggle Navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <!-- Branding Image -->
+                    <a class="navbar-brand" href="javascript:void(0);">
+                        {{ headText }}
+                    </a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="app-navbar-collapse">
+                    <!-- Left Side Of Navbar -->
+                    <!--ul class="nav navbar-nav">
+                        &nbsp;
+                    </ul-->
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li v-for="(nav,index) in navs" class="nav-item">
+                            <a class="nav-link text-dark" :href="nav.link" @click="nav.onclick(index)">{{ nav.name }}</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">登录</div>
+        
+                        <div class="panel-body">
+                            <div class="form-horizontal">
+        
+                                <div class="form-group" :class="unClass">
+                                    <label for="username" class="col-md-4 control-label">账号</label>
+                                    <div class="col-md-6">
+                                        <input id="username" v-model="username" type="text" class="form-control" required autofocus>
+                                    </div>   
+                                </div>
+        
+                                <div class="form-group">
+                                    <label for="password" class="col-md-4 control-label">密码</label>
+                                    <div class="col-md-6">
+                                        <input id="password" v-model="password" type="password" class="form-control" required>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group">
+                                    <div class="col-md-8 col-md-offset-4">
+                                        <button id="submit" class="btn btn-primary" @click="login">
+                                            登录
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/config.js"></script>
+    <script src="./js/jquery-3.3.1.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/vue-resource.min.js"></script>
+    <script src="./js/vue-components/modal.js"></script>
+    <script src="./js/util.js"></script>
+    <script src="./js/auth.js"></script>
+
+    <script>
+window.onload = function() {
+
+    var hiddenDiv = new Vue({
+        el: '#hiddenDiv',
+        methods: {
+            confirm: function() {
+            }
+        },
+    });
+
+    var ajaxErrorHandler = function(res) {
+        var newline = '<br />';
+        var title = '[' + res.status + ']' + res.statusText;
+        var body = 'URL=' + res.url + newline;
+        body += 'Message=' + res.body.Message;
+        hiddenDiv.$refs.confirm.show(title, body);
+        app.unClass["has-error"] = true;
+    };
+
+    var unClass = {}; unClass["has-error"] = false;
+    var app = new Vue({
+        el: '#app',
+        data: {
+            username: '',
+            password: '',
+
+            headText: config.defaultHeadText,
+            loginUri: '',
+            navs: config.defaultNavs,
+            unClass: unClass,
+        },
+        methods: {
+            init: function() {
+                //
+            },
+            login: function() {
+                var params = getBasePostParams();
+                params.username = this.username;
+                params.password = this.password;
+                this.$http.post(config.getLoginApiUrl(), params, {emulateJSON:true}).then(function(res) {
+                    var cookies = res.body;
+                    savePixivCookies(cookies);
+                    redirectToReferrerPage();
+                }, ajaxErrorHandler);
+            },
+        },
+        mounted: function() {
+            this.$nextTick(function() {
+                this.init();
+            });
+        },
+    });
+
+    window.app = app;
+
+}
+    </script>
+
+</body>
+</html>
