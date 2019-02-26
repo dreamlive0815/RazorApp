@@ -50,6 +50,9 @@
                 </div>
             </div>
         </nav>
+
+        <profile ref="profile" :user="user" @ontryfollow="tryFollow" @ontryunfollow="tryUnFollow" ></profile>
+        <listandcarousel ref="listandcarousel" :imgs="imgs" :enablepageindicator="false" @onslidestart="slideStart" @onslideend="slideEnd"></listandcarousel>
         
     </div>
 
@@ -61,29 +64,31 @@
     <script src="./js/vue.min.js"></script>
     <script src="./js/vue-resource.min.js"></script>
     <script src="./js/vue-components/modal.js"></script>
+    <script src="./js/vue-components/profile.js"></script>
+    <script src="./js/vue-components/list.js"></script>
     <script src="./js/vue-components/carousel.js"></script>
+    <script src="./js/vue-components/listandcarousel.js"></script>
     <script src="./js/util.js"></script>
     <script src="./js/auth.js"></script>
 
     <script>
+        
 window.onload = function() {
     redirectToLoginPageIfNoCookies();
 
+    var confirmHandler = function() {};
     var hiddenDiv = new Vue({
         el: '#hiddenDiv',
         methods: {
             confirm: function() {
+                confirmHandler();
+                confirmHandler = function() {};
+            },
+            getModal: function() {
+                return this.$refs.confirm;
             }
         },
     });
-
-        /*
-            this.imgs = [
-                {src:"https://t1.onvshen.com:85/gallery/21501/26714/s/001.jpg", title:"1"},
-                {src:"https://t1.onvshen.com:85/gallery/21501/26714/s/002.jpg", title:"2"},
-                {src:"https://t1.onvshen.com:85/gallery/21501/26714/s/003.jpg", title:"3"}
-            ];
-        */
 
     var ajaxErrorHandler = function(res) {
         redirectToLoginPageIfCookiesExpired(res);
@@ -93,21 +98,77 @@ window.onload = function() {
         body += 'Message=' + res.body.Message;
         hiddenDiv.$refs.confirm.show(title, body);
     };
+
+    var query = getQueryParams();
+    var illustId = query.id;
+    console.log('illustId', illustId);
     
+    var headText = config.defaultHeadText;
+    var navs = config.defaultNavs;
+    navs.push(switchDisplayModeNav);
     var app = new Vue({
         el: '#app',
         data: {
             headText: config.defaultHeadText,
-            navs: config.defaultNavs,
-            list: [
-            ],
+            illustId: illustId,
+            navs: navs,
             imgs: [
             ],
+            user: {
+                id: '0',
+                avatar: '',
+                follow: false,
+                name: '',
+            },
         },
         methods: {
             init: function() {
-
+                this.loadIllust(this.illustId);
             },
+            getPlayer: function() {
+                return this.$refs.listandcarousel;
+            },
+            loadIllust: function(illustId) {
+                this.headText = '加载中...';
+                this.imgs = [];
+                var params = mergeObj(getBasePostParams(), {
+                    illustId: illustId,
+                });
+                this.$http.post(config.getIllustInfoApiUrl(), params, {emulateJSON:true}).then(function(res) {
+                    var json = res.body;
+                    var illust = json.illust;
+                    this.user = json.illust.user;
+                    var urls = json.urls;
+                    var imgs = [];
+                    urls.forEach((i, index) => {
+                        imgs.push({
+                            src: i,
+                            title: index + 1,
+                        })
+                    });
+                    this.imgs = imgs;
+                    headText = illust.title;
+                    this.headText = headText;
+                }, ajaxErrorHandler);
+            },
+            slideStart: function() {
+                this.headText = '翻页中...';
+            },
+            slideEnd: function() {
+                this.headText = headText;
+            },
+            switchDisplayMode: function() {
+                this.getPlayer().switchDisplayMode();
+            },
+            resetList() {
+                this.getPlayer().resetList();
+            },
+            tryFollow(userId) {
+                console.log('follow', userId);
+            },
+            tryUnFollow(userId) {
+                console.log('unfollow', userId);
+            }
         },
         mounted: function() {
             this.$nextTick(function() {

@@ -50,6 +50,8 @@
                 </div>
             </div>
         </nav>
+
+        <listandcarousel ref="listandcarousel" :imgs="imgs" :hasprevpage="hasPrevPage" :hasnextpage="hasNextPage" @onprevpage="prevPage" @onnextpage="nextPage" @onslidestart="slideStart" @onslideend="slideEnd"></listandcarousel>
         
     </div>
 
@@ -61,7 +63,9 @@
     <script src="./js/vue.min.js"></script>
     <script src="./js/vue-resource.min.js"></script>
     <script src="./js/vue-components/modal.js"></script>
+    <script src="./js/vue-components/list.js"></script>
     <script src="./js/vue-components/carousel.js"></script>
+    <script src="./js/vue-components/listandcarousel.js"></script>
     <script src="./js/util.js"></script>
     <script src="./js/auth.js"></script>
 
@@ -77,14 +81,6 @@ window.onload = function() {
         },
     });
 
-        /*
-            this.imgs = [
-                {src:"https://t1.onvshen.com:85/gallery/21501/26714/s/001.jpg", title:"1"},
-                {src:"https://t1.onvshen.com:85/gallery/21501/26714/s/002.jpg", title:"2"},
-                {src:"https://t1.onvshen.com:85/gallery/21501/26714/s/003.jpg", title:"3"}
-            ];
-        */
-
     var ajaxErrorHandler = function(res) {
         redirectToLoginPageIfCookiesExpired(res);
         var newline = '<br />';
@@ -94,20 +90,78 @@ window.onload = function() {
         hiddenDiv.$refs.confirm.show(title, body);
     };
     
+    var headText = config.defaultHeadText;
+    var navs = config.defaultNavs;
+    navs.push(switchDisplayModeNav);
     var app = new Vue({
         el: '#app',
         data: {
             headText: config.defaultHeadText,
-            navs: config.defaultNavs,
-            list: [
-            ],
+            navs: navs,
             imgs: [
             ],
+            hasPrevPage: false,
+            hasNextPage: false,
         },
         methods: {
             init: function() {
-
+                this.loadBookmarkNewIllusts(this.getPageId());
             },
+            getPlayer: function() {
+                return this.$refs.listandcarousel;
+            },
+            loadBookmarkNewIllusts: function(pageId) {
+                this.headText = '加载中...';
+                this.imgs = [];
+                this.hasPrevPage = this.hasNextPage = false;
+                var params = mergeObj(getBasePostParams(), {
+                    pageId: pageId,
+                });
+                this.$http.post(config.getBookmarkNewIllustsApiUrl(), params, {emulateJSON:true}).then(function(res) {
+                    var json = res.body;
+                    var illusts = json.illustrations;
+                    var imgs = [];
+                    illusts.forEach(i => {
+                        imgs.push({
+                            href: config.getIllustPageUrl(i.id),
+                            src: i.thumbnail,
+                            title: i.title,
+                        })
+                    });
+                    this.imgs = imgs;
+                    this.hasPrevPage = json.hasPrevPage;
+                    this.hasNextPage = json.hasNextPage;
+                    headText = '第' + pageId + '页';
+                    this.headText = headText;
+                }, ajaxErrorHandler);
+            },
+            prevPage: function(pageId) {
+                console.log('prev', pageId);
+                this.loadBookmarkNewIllusts(pageId);
+            },
+            nextPage: function(pageId) {
+                console.log('next', pageId);
+                this.loadBookmarkNewIllusts(pageId);
+            },
+            slideStart: function() {
+                this.headText = '翻页中...';
+            },
+            slideEnd: function() {
+                this.headText = headText;
+            },
+            switchDisplayMode: function() {
+                this.getPlayer().switchDisplayMode();
+            },
+            getPageId() {
+                return this.getPlayer().getPageId();
+            },
+            setPageId(pageId) {
+                this.getPlayer().setPageId(pageId);
+                this.loadBookmarkNewIllusts(pageId);
+            },
+            resetList() {
+                this.getPlayer().resetList();
+            }
         },
         mounted: function() {
             this.$nextTick(function() {

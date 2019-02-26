@@ -1,4 +1,5 @@
 
+//后者覆盖前者
 function firstCharUpperCase(s)
 {
     if(typeof(s) != 'string') s = s.toString();
@@ -28,6 +29,14 @@ function has(obj, property)
 {
     if(typeof(obj) != 'object') return false;
     return obj.hasOwnProperty(property);
+}
+
+function mergeObj(obj1, obj2) {
+    if (typeof obj1 != 'object' || typeof obj2 != 'object') return {};
+    for (var k in obj2) {
+        if(obj2.hasOwnProperty(k)) obj1[k] = obj2[k];
+    }
+    return obj1;
 }
 
 //刷新当前页面

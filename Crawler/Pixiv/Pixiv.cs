@@ -124,7 +124,7 @@ namespace Crawler.Pixiv
             var url = GetCommentsUrl(illustId, offset, limit);
             var s = _client.GetString(_client.BuildRequest(url));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析插画评论集合信息时出错");
             AssertOKJsonResult(obj);
@@ -198,7 +198,7 @@ namespace Crawler.Pixiv
             if (items == null)
                 throw new Exception("无法获取最新插画信息");
             items = HttpUtility.HtmlDecode(items);
-            var arr = JArray.Parse(items);
+            var arr = GetJArray(items);
 
             var page = new IllustrationsPage() {
                 NextPageId = nextPageId,
@@ -362,7 +362,7 @@ namespace Crawler.Pixiv
             if (!match.Success)
                 throw new Exception("获取插画信息时出错");
             
-            var obj = JObject.Parse(match.Groups[1].Value);
+            var obj = GetJObject(match.Groups[1].Value);
             var illust = obj.JsonPathSingle("$.preload.illust.*");
             var user = obj.JsonPathSingle("$.preload.user.*");
             if (obj == null || illust == null)
@@ -428,7 +428,7 @@ namespace Crawler.Pixiv
 
             var url = GetRankListUrl(mode, pageId);
             var s = _client.GetString(_client.BuildRequest(url));
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析排行榜信息时出错");
             
@@ -482,7 +482,7 @@ namespace Crawler.Pixiv
             var url = GetRecommendIllustrationIdsUrl(illustId);
             var s = _client.GetString(_client.BuildRequest(url));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception($"解析作品:{illustId}推荐作品ID集合时出错");
             AssertOKJsonResult(obj);
@@ -517,7 +517,7 @@ namespace Crawler.Pixiv
             var url = GetRecommendIllustrationsUrl(illustIds);
             var s = _client.GetString(_client.BuildRequest(url));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception($"解析推荐作品信息时出错");
             AssertOKJsonResult(obj);
@@ -602,7 +602,7 @@ namespace Crawler.Pixiv
             var url = GetUserIllustrationsUrl(userId, illustIds);
             var s = _client.GetString(_client.BuildRequest(url));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析用户插画集合信息时出错");
             AssertOKJsonResult(obj);
@@ -679,7 +679,7 @@ namespace Crawler.Pixiv
             var url = GetUserIllustrationIdsUrl(userId);
             var s = _client.GetString(_client.BuildRequest(url));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析用户插画ID集合时出错");
             AssertOKJsonResult(obj);
@@ -720,7 +720,7 @@ namespace Crawler.Pixiv
             var url = GetUsersProfileUrl(userIds);
             var s = _client.GetString(_client.BuildRequest(url));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析用户信息时出错");
             AssertOKJsonResult(obj);
@@ -775,7 +775,7 @@ namespace Crawler.Pixiv
 
             var s = _client.GetString(GetBookmarkIllustrationRequest(illustId));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析关注用户操作的返回信息出错");
             AssertOKJsonResult(obj);
@@ -836,7 +836,7 @@ namespace Crawler.Pixiv
             
             var s = _client.GetString(GetCommentRequest(illustId, authorId, text));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析评论插画操作的返回信息出错");
             AssertOKJsonResult(obj);   
@@ -890,7 +890,7 @@ namespace Crawler.Pixiv
             
             var s = _client.GetString(GetCommentEmojiRequest(illustId, authorId, emojiId));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析评论插画(贴图表情)操作的返回信息出错");
             AssertOKJsonResult(obj);
@@ -935,7 +935,7 @@ namespace Crawler.Pixiv
             
             var s = _client.GetString(GetRemoveMyCommentRequest(illustId, commentId));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析删除评论操作的返回信息出错");
             AssertOKJsonResult(obj);
@@ -1006,7 +1006,7 @@ namespace Crawler.Pixiv
             
             var s = _client.GetString(GetLikeIllustrationRequest(illustId));
 
-            var obj = JObject.Parse(s);
+            var obj = GetJObject(s);
             if (obj == null)
                 throw new Exception("解析点赞插画操作的返回信息出错");
             AssertOKJsonResult(obj);            
@@ -1031,6 +1031,24 @@ namespace Crawler.Pixiv
             if (error) {
                 var message = token.Val<string>("message") ?? "Default Exception Message";
                 throw new Exception(message);
+            }
+        }
+
+        private JArray GetJArray(string s)
+        {
+            try {
+                return JArray.Parse(s);
+            } catch {
+                return null;
+            }
+        }
+
+        private JObject GetJObject(string s)
+        {
+            try {
+                return JObject.Parse(s);
+            } catch {
+                return null;
             }
         }
 

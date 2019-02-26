@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="never">
+
+    <title>Pixiv</title>
+
+    <!-- Styles -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/app.css" rel="stylesheet">
+</head>
+<body>
+    <div id="hiddenDiv">
+        <modal id="confirmModal" ref="confirm" @onconfirm="confirm"></modal>
+    </div>
+    <div id="app" class="">
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+
+                    <!-- Collapsed Hamburger -->
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
+                        <span class="sr-only">Toggle Navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <!-- Branding Image -->
+                    <a class="navbar-brand" href="javascript:void(0);">
+                        {{ headText }}
+                    </a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="app-navbar-collapse">
+                    <!-- Left Side Of Navbar -->
+                    <!--ul class="nav navbar-nav">
+                        &nbsp;
+                    </ul-->
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li v-for="(nav,index) in navs" class="nav-item">
+                            <a class="nav-link text-dark" :href="nav.link" @click="nav.onclick(index)">{{ nav.name }}</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+
+        <div class="container form-horizontal">
+            <div class="form-group">
+                <select id="rankTypes" class="form-control" @change="rankTypeChanged">
+                    <option value="daily">daily</option>
+                    <option value="daily_r18">daily_r18</option>
+                    <option value="female">female</option>
+                    <option value="female_r18">female_r18</option>
+                    <option value="male">male</option>
+                    <option value="male_r18">male_r18</option>
+                    <option value="monthly">monthly</option>
+                    <option value="original">original</option>
+                    <option value="rookie">rookie</option>
+                    <option value="weekly">weekly</option>
+                    <option value="weekly_r18">weekly_r18</option>
+                </select>
+            </div>
+        </div>
+
+        <listandcarousel ref="listandcarousel" :imgs="imgs" :hasprevpage="hasPrevPage" :hasnextpage="hasNextPage" @onprevpage="prevPage" @onnextpage="nextPage" @onslidestart="slideStart" @onslideend="slideEnd"></listandcarousel>
+        
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/config.js"></script>
+    <script src="./js/config-carousel-extend.js"></script>
+    <script src="./js/jquery-3.3.1.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/vue-resource.min.js"></script>
+    <script src="./js/vue-components/modal.js"></script>
+    <script src="./js/vue-components/list.js"></script>
+    <script src="./js/vue-components/carousel.js"></script>
+    <script src="./js/vue-components/listandcarousel.js"></script>
+    <script src="./js/util.js"></script>
+    <script src="./js/auth.js"></script>
+
+    <script>
+window.onload = function() {
+    redirectToLoginPageIfNoCookies();
+
+    var hiddenDiv = new Vue({
+        el: '#hiddenDiv',
+        methods: {
+            confirm: function() {
+            }
+        },
+    });
+
+    var ajaxErrorHandler = function(res) {
+        redirectToLoginPageIfCookiesExpired(res);
+        var newline = '<br />';
+        var title = '[' + res.status + ']' + res.statusText;
+        var body = 'URL=' + res.url + newline;
+        body += 'Message=' + res.body.Message;
+        hiddenDiv.$refs.confirm.show(title, body);
+    };
+    
+    var headText = config.defaultHeadText;
+    var navs = config.defaultNavs;
+    navs.push(switchDisplayModeNav);
+    var app = new Vue({
+        el: '#app',
+        data: {
+            headText: config.defaultHeadText,
+            navs: navs,
+            imgs: [
+            ],
+            hasPrevPage: false,
+            hasNextPage: false,
+            rankType: 'daily',
+        },
+        methods: {
+            init: function() {
+                this.setRankTypeAndLoad('daily');
+            },
+            getPlayer: function() {
+                return this.$refs.listandcarousel;
+            },
+            loadRankList: function(type, pageId) {
+                this.headText = '加载中...';
+                this.imgs = [];
+                this.hasPrevPage = this.hasNextPage = false;
+                var params = mergeObj(getBasePostParams(), {
+                    type: type,
+                    pageId: pageId,
+                });
+                this.$http.post(config.getRankApiUrl(), params, {emulateJSON:true}).then(function(res) {
+                    var json = res.body;
+                    var illusts = json.illustrations;
+                    var imgs = [];
+                    illusts.forEach(i => {
+                        imgs.push({
+                            href: config.getIllustPageUrl(i.id),
+                            src: i.thumbnail,
+                            title: i.title,
+                        })
+                    });
+                    this.imgs = imgs;
+                    this.hasPrevPage = json.hasPrevPage;
+                    this.hasNextPage = json.hasNextPage;
+                    headText = '[' + this.rankType + ']' + '第' + pageId + '页';
+                    this.headText = headText;
+                }, ajaxErrorHandler);
+            },
+            prevPage: function(pageId) {
+                console.log('prev', pageId);
+                this.loadRankList(this.rankType, pageId);
+            },
+            nextPage: function(pageId) {
+                console.log('next', pageId);
+                this.loadRankList(this.rankType, pageId);
+            },
+            setRankTypeAndLoad: function(type) {
+                this.rankType = type;
+                this.resetList();
+                this.loadRankList(this.rankType, this.getPageId());
+            },
+            slideStart: function() {
+                this.headText = '翻页中...';
+            },
+            slideEnd: function() {
+                this.headText = headText;
+            },
+            switchDisplayMode: function() {
+                this.getPlayer().switchDisplayMode();
+            },
+            rankTypeChanged() {
+                var newRankType = $('#rankTypes').val();
+                this.setRankTypeAndLoad(newRankType);
+            },
+            getPageId() {
+                return this.getPlayer().getPageId();
+            },
+            setPageId(pageId) {
+                this.getPlayer().setPageId(pageId);
+                this.loadRankList(this.rankType, pageId);
+            },
+            resetList() {
+                this.getPlayer().resetList();
+            }
+        },
+        mounted: function() {
+            this.$nextTick(function() {
+                this.init();
+            });
+        },
+    });
+    window.app = app;
+
+}
+    </script>
+
+</body>
+</html>

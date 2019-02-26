@@ -30,6 +30,7 @@ function redirectToLoginPageIfNoCookies()
 
 function redirectToLoginPageIfCookiesExpired(res)
 {
+    if (!res.body.Message) return;
     if (res.body.Message.indexOf('请先登录') != -1) redirectToLoginPage();
 }
 

@@ -10,7 +10,8 @@ Vue.component('modal', {
         body: String,
         id: {
             type: String,
-            required: true
+            required: true,
+            default: 'mymodal',
         },
         title: String,
     },

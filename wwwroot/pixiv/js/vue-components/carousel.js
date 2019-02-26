@@ -12,21 +12,31 @@ Vue.component('carousel', {
     props: {
         id: {
             type: String,
-            required: true
+            required: true,
+            default: 'mycarousel',
         },
         imgs: {
             type: Object,
-            required: true
+            required: true,
+            default: [],
         },
-        interval: Number,
-        visible: Boolean,
+        interval: { 
+            type: Number,
+            default: config.defaultAutoSlideInterval,
+        },
+        visible: {
+            type: Boolean,
+            default: false,
+        },
         //下方指示器 快速定位到指定页
-        enableindicator: Boolean,
+        enableindicator: {
+            type: Boolean,
+            default: false,
+        },
     },
     template: '\
 <div :style="{display:visible ? \'block\' : \'none\' }">\
     <div class="carousel slide" :id="id" @dblclick="dblclickHandler">\
-        <button class="btn btn-primary btn-block" @click="switchAutoSilde">自动翻页({{ autoSlide ? \'开\' : \'关\' }})</button>\
         <ol v-if="enableindicator" class="carousel-indicators">\
             <li v-for="(img,index) in imgs" :data-target="\'#\' + id" :data-slide-to="index" :class="{active:index==0}"></li>\
         </ol>\
@@ -44,6 +54,7 @@ Vue.component('carousel', {
             <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>\
             <span class="sr-only">Next</span>\
         </a>\
+        <button class="btn btn-primary btn-block" @click="switchAutoSilde">自动翻页({{ autoSlide ? \'开\' : \'关\' }})</button>\
     </div>\
 </div>',
     data: function() {
