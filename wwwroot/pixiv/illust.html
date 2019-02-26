@@ -51,7 +51,7 @@
             </div>
         </nav>
 
-        <profile ref="profile" :user="user" @ontryfollow="tryFollow" @ontryunfollow="tryUnFollow" ></profile>
+        <profile ref="profile" :visible="profileVisible" :user="user" @ontryfollow="tryFollow" @ontryunfollow="tryUnFollow" ></profile>
         <listandcarousel ref="listandcarousel" :imgs="imgs" :enablepageindicator="false" @onslidestart="slideStart" @onslideend="slideEnd"></listandcarousel>
         
     </div>
@@ -120,6 +120,7 @@ window.onload = function() {
                 follow: false,
                 name: '',
             },
+            profileVisible: true,
         },
         methods: {
             init: function() {
@@ -158,6 +159,7 @@ window.onload = function() {
                 this.headText = headText;
             },
             switchDisplayMode: function() {
+                this.profileVisible = !this.profileVisible;
                 this.getPlayer().switchDisplayMode();
             },
             resetList() {

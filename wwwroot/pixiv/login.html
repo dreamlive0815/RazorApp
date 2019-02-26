@@ -60,7 +60,7 @@
                         <div class="panel-body">
                             <div class="form-horizontal">
         
-                                <div class="form-group" :class="unClass">
+                                <div class="form-group" :class="{'has-error':hasError}">
                                     <label for="username" class="col-md-4 control-label">账号</label>
                                     <div class="col-md-6">
                                         <input id="username" v-model="username" type="text" class="form-control" required autofocus>
@@ -77,7 +77,7 @@
                                 <div class="form-group">
                                     <div class="col-md-8 col-md-offset-4">
                                         <button id="submit" class="btn btn-primary" @click="login">
-                                            登录
+                                            {{ btnText }}
                                         </button>
                                     </div>
                                 </div>
@@ -117,20 +117,22 @@ window.onload = function() {
         var body = 'URL=' + res.url + newline;
         body += 'Message=' + res.body.Message;
         hiddenDiv.$refs.confirm.show(title, body);
-        app.unClass["has-error"] = true;
+        app.headText = app.btnText = '登录';
+        app.hasError = true;
     };
-
-    var unClass = {}; unClass["has-error"] = false;
+    
+    var headText = config.defaultHeadText;
     var app = new Vue({
         el: '#app',
         data: {
             username: '',
             password: '',
 
-            headText: config.defaultHeadText,
+            headText: headText,
             loginUri: '',
             navs: config.defaultNavs,
-            unClass: unClass,
+            btnText: '登录',
+            hasError: false,
         },
         methods: {
             init: function() {
@@ -140,6 +142,7 @@ window.onload = function() {
                 var params = getBasePostParams();
                 params.username = this.username;
                 params.password = this.password;
+                this.headText = this.btnText = '登录中...';
                 this.$http.post(config.getLoginApiUrl(), params, {emulateJSON:true}).then(function(res) {
                     var cookies = res.body;
                     savePixivCookies(cookies);

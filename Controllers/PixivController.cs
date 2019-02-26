@@ -29,6 +29,12 @@ namespace Controllers
             pixiv = new Pixiv(client);
         }
 
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return Redirect("/pixiv/index.html");
+        }
+
         [HttpPost("bookmarknewillusts")]
         public IActionResult BookmarkNewIllustration([FromForm] string cookies, [FromForm] string pageId)
         {
