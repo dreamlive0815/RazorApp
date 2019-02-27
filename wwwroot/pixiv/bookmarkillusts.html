@@ -106,19 +106,19 @@ window.onload = function() {
         },
         methods: {
             init: function() {
-                this.loadBookmarkNewIllusts(this.getPageId());
+                this.loadBookmarkIllusts(this.getPageId());
             },
             getPlayer: function() {
                 return this.$refs.listandcarousel;
             },
-            loadBookmarkNewIllusts: function(pageId) {
+            loadBookmarkIllusts: function(pageId) {
                 this.headText = '加载中...';
                 this.imgs = [];
                 this.hasPrevPage = this.hasNextPage = false;
                 var params = mergeObj(getBasePostParams(), {
                     pageId: pageId,
                 });
-                this.$http.post(config.getBookmarkNewIllustsApiUrl(), params, {emulateJSON:true}).then(function(res) {
+                this.$http.post(config.getBookmarkIllustsApiUrl(), params, {emulateJSON:true}).then(function(res) {
                     var json = res.body;
                     var illusts = json.illustrations;
                     var imgs = [];
@@ -133,17 +133,17 @@ window.onload = function() {
                     this.imgs = imgs;
                     this.hasPrevPage = json.hasPrevPage;
                     this.hasNextPage = json.hasNextPage;
-                    headText = '[关注用户的新作品]第' + pageId + '页';
+                    headText = '[收藏的作品]第' + pageId + '页';
                     this.headText = headText;
                 }, ajaxErrorHandler);
             },
             prevPage: function(pageId) {
                 console.log('prev', pageId);
-                this.loadBookmarkNewIllusts(pageId);
+                this.loadBookmarkIllusts(pageId);
             },
             nextPage: function(pageId) {
                 console.log('next', pageId);
-                this.loadBookmarkNewIllusts(pageId);
+                this.loadBookmarkIllusts(pageId);
             },
             slideStart: function() {
                 this.headText = '翻页中...';
@@ -159,7 +159,7 @@ window.onload = function() {
             },
             setPageId(pageId) {
                 this.getPlayer().setPageId(pageId);
-                this.loadBookmarkNewIllusts(pageId);
+                this.loadBookmarkIllusts(pageId);
             },
             resetList() {
                 this.getPlayer().resetList();

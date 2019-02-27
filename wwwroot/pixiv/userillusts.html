@@ -52,23 +52,7 @@
         </nav>
 
         <profile ref="profile" :visible="profileVisible" :user="user" @ontryfollow="tryFollow" @ontryunfollow="tryUnFollow" ></profile>
-        <listandcarousel ref="listandcarousel" :imgs="imgs" :enablepageindicator="false" @onslidestart="slideStart" @onslideend="slideEnd"></listandcarousel>
-
-        <div id="detail" v-if="detailVisible" class="container">
-            <ul class="list-group">
-                <li class="list-group-item">名称：{{ illust.title }}</li>
-                <li class="list-group-item">描述：{{ illust.description }}</li>
-                <li class="list-group-item">收藏：{{ illust.bookmarkCount }}</li>
-                <li class="list-group-item">喜欢：{{ illust.likeCount }}</li>
-                <li class="list-group-item">浏览：{{ illust.viewCount }}</li>
-                <li class="list-group-item">标签：{{ illust.tags.join(',') }}</li>
-            </ul>
-
-            <button class="btn btn-block" :disabled="illust.liked" :class="{'btn-primary':illust.liked}" @click="switchLikeState">{{ illust.liked ? '已赞' : '赞' }}</button>
-            <button class="btn btn-block" :class="{'btn-primary':illust.bookmarked}" @click="switchBookmarkState">{{ illust.bookmarked ? '已收藏' : '添加收藏' }}</button>
-        </div>
-
-        <br />
+        <listandcarousel ref="listandcarousel" :imgs="imgs" :hasprevpage="hasPrevPage" :hasnextpage="hasNextPage" @onprevpage="prevPage" @onnextpage="nextPage" @onslidestart="slideStart" @onslideend="slideEnd"></listandcarousel>
         
     </div>
 
@@ -118,8 +102,8 @@ window.onload = function() {
     };
 
     var query = getQueryParams();
-    var illustId = query.id;
-    console.log('illustId', illustId);
+    var userId = query.id;
+    console.log('userId', userId);
     
     var headText = config.defaultHeadText;
     var navs = config.defaultNavs;
@@ -128,66 +112,67 @@ window.onload = function() {
         el: '#app',
         data: {
             headText: config.defaultHeadText,
-            illustId: illustId,
+            userId: userId,
             navs: navs,
             imgs: [
             ],
             user: {
-                id: '',
+                id: '0',
                 avatar: '',
                 follow: false,
                 href: '',
                 name: '',
             },
-            illust: {
-                id: '',
-                title: '',
-                bookmarkId: '',
-                bookmarked: false,
-                liked: false,
-                count: 0,
-                description: '',
-                bookmarkCount: 0,
-                likeCount: 0,
-                viewCount: 0,
-                tags: [],
-            },
+            hasPrevPage: false,
+            hasNextPage: false,
             profileVisible: true,
-            detailVisible: true,
         },
         methods: {
             init: function() {
-                this.loadIllust(this.illustId);
+                var that = this;
+                pixiv.api.getUserProfile(this.userId, function(res) {
+                    var json = res.body;
+                    var user = json;
+                    user.href = config.getUserIllustsPageUrl(user.id);
+                    that.user = user;
+                }, ajaxErrorHandler);
+                this.loadUserIllusts(this.userId, this.getPageId());
             },
             getPlayer: function() {
                 return this.$refs.listandcarousel;
             },
-            loadIllust: function(illustId) {
+            loadUserIllusts: function(userId, pageId) {
                 this.headText = '加载中...';
                 this.imgs = [];
                 var params = mergeObj(getBasePostParams(), {
-                    illustId: illustId,
+                    userId: userId,
+                    pageId: pageId,
                 });
-                this.$http.post(config.getIllustInfoApiUrl(), params, {emulateJSON:true}).then(function(res) {
+                this.$http.post(config.getUserIllustsApiUrl(), params, {emulateJSON:true}).then(function(res) {
                     var json = res.body;
-                    var illust = json.illust;
-                    var user = illust.user;
-                    user.href = config.getUserIllustsPageUrl(user.id);
-                    this.user = user;
-                    this.illust = illust;
-                    var urls = json.urls;
+                    var illusts = json.illustrations;
                     var imgs = [];
-                    urls.forEach((i, index) => {
+                    illusts.forEach(i => {
                         imgs.push({
-                            href: i,
-                            src: i,
-                            title: index + 1,
+                            href: config.getIllustPageUrl(i.id),
+                            src: i.thumbnail,
+                            title: i.title,
                         })
                     });
                     this.imgs = imgs;
-                    headText = '[作品]';
+                    this.hasPrevPage = json.hasPrevPage;
+                    this.hasNextPage = json.hasNextPage;
+                    headText = '第' + pageId + '/' + json.totalPageCount + '页(每页' + json.perPageCount + ')';
                     this.headText = headText;
                 }, ajaxErrorHandler);
+            },
+            prevPage: function(pageId) {
+                console.log('prev', pageId);
+                this.loadUserIllusts(this.userId, pageId);
+            },
+            nextPage: function(pageId) {
+                console.log('next', pageId);
+                this.loadUserIllusts(this.userId, pageId);
             },
             slideStart: function() {
                 this.headText = '翻页中...';
@@ -197,11 +182,20 @@ window.onload = function() {
             },
             switchDisplayMode: function() {
                 this.profileVisible = !this.profileVisible;
-                this.detailVisible = !this.detailVisible;
                 this.getPlayer().switchDisplayMode();
+            },
+            getPageId() {
+                return this.getPlayer().getPageId();
+            },
+            setPageId(pageId) {
+                this.getPlayer().setPageId(pageId);
+                this.loadUserIllusts(this.userId, pageId);
             },
             resetList() {
                 this.getPlayer().resetList();
+            },
+            getProfile() {
+                return this.$refs.profile;
             },
             tryFollow(userId) {
                 console.log('follow', userId);
@@ -221,50 +215,6 @@ window.onload = function() {
                 }   , ajaxErrorHandler);
                 };
                 hiddenDiv.getModal().show('取消关注', '你确定要取消关注' + userName + '吗?');
-            },
-            //不能取消点赞
-            switchLikeState() {
-                var illust = this.illust;
-                if (!illust.id) return;
-                if (!illust.liked)
-                    this.like(illust.id);
-            },
-            like(illustId) {
-                console.log('like', illustId);
-                if (!illustId) return;
-                var that = this;
-                pixiv.api.likeIllust(illustId, function (res) {
-                    that.illust.liked = true;
-                }, ajaxErrorHandler);
-            },
-            switchBookmarkState() {
-                var illust = this.illust;
-                if (!illust.id) return;
-                if (illust.bookmarked)
-                    this.unBookmarkIllust(illust.bookmarkId, illust.title);
-                else
-                    this.bookmarkIllust(illust.id);
-            },
-            bookmarkIllust(illustId) {
-                console.log('bookmarkIllust', illustId);
-                if (!illustId) return;
-                var that = this;
-                pixiv.api.bookmarkIllust(illustId, function (res) {
-                    var newbookid = res.body;
-                    that.illust.bookmarkId = newbookid;
-                    that.illust.bookmarked = true;
-                }, ajaxErrorHandler);
-            },
-            unBookmarkIllust(bookid, illustName) {
-                console.log('unBookmarkIllust', bookid, illustName);
-                if (!bookid) return;
-                var that = this;
-                confirmHandler = function() {
-                    pixiv.api.unBookmarkIllust(bookid, function (res) {
-                        that.illust.bookmarked = false;
-                }   , ajaxErrorHandler);
-                };
-                hiddenDiv.getModal().show('取消收藏', '你确定要取消收藏作品' + illustName + '吗?');
             }
         },
         mounted: function() {

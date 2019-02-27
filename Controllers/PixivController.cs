@@ -35,8 +35,22 @@ namespace Controllers
             return Redirect("/pixiv/index.html");
         }
 
+        [HttpPost("bookmarkillusts")]
+        public IActionResult BookmarkIllustrations([FromForm] string cookies, [FromForm] string pageId)
+        {
+            AssertLoggedIn(cookies);
+
+            if (string.IsNullOrEmpty(pageId)) pageId = "1";
+            var page = pixiv.GetBookmarkIllustrations(pageId);
+            page.Illustrations.ForEach(i => {
+                i.Thumbnail = GetLocalProxyImageUrl(i.Thumbnail);
+            });
+
+            return Json(page);
+        }
+
         [HttpPost("bookmarknewillusts")]
-        public IActionResult BookmarkNewIllustration([FromForm] string cookies, [FromForm] string pageId)
+        public IActionResult BookmarkNewIllustrations([FromForm] string cookies, [FromForm] string pageId)
         {
             AssertLoggedIn(cookies);
 
@@ -50,7 +64,7 @@ namespace Controllers
         }
 
         [HttpPost("illust")]
-        public IActionResult Illustration([FromForm] string cookies, [FromForm] string illustId)
+        public IActionResult IllustrationInfo([FromForm] string cookies, [FromForm] string illustId)
         {
             AssertLoggedIn(cookies);
 
@@ -74,6 +88,26 @@ namespace Controllers
             pixiv.Login(username, password);
             var cookies = pixiv.GetCookies();
             return Ok(cookies);
+        }
+
+        /// <summary>
+        /// 暂时不支持获取私人关注
+        /// </summary>
+        /// <param name="cookies"></param>
+        /// <param name="pageId"></param>
+        /// <returns></returns>
+        [HttpPost("myfollow")]
+        public IActionResult MyFollow([FromForm] string cookies, [FromForm] string pageId)
+        {
+            AssertLoggedIn(cookies);
+
+            if (string.IsNullOrEmpty(pageId)) pageId = "1";
+            var page = pixiv.GetBookmarkUsers(pageId);
+            page.Users.ForEach(i => {
+                i.Avatar = GetLocalProxyImageUrl(i.Avatar);
+            });
+
+            return Json(page);
         }
 
         [HttpPost("ranklist")]
@@ -102,9 +136,37 @@ namespace Controllers
             var page = pixiv.GetRankList(mode, pageId);
             page.Illustrations.ForEach(i => {
                 i.Thumbnail = GetLocalProxyImageUrl(i.Thumbnail);
+                i.User.Avatar = GetLocalProxyImageUrl(i.User.Avatar);
             });
             
             return Json(page);
+        }
+
+        [HttpPost("userillusts")]
+        public IActionResult UserIllustrations([FromForm] string cookies, [FromForm] string userId, [FromForm] string pageId)
+        {
+            AssertLoggedIn(cookies);
+
+            var p = 1;
+            int.TryParse(pageId, out p);
+            
+            var page = pixiv.GetUserIllustrations(userId, p);
+            page.Illustrations.ForEach(i => {
+                i.Thumbnail = GetLocalProxyImageUrl(i.Thumbnail);
+            });
+
+            return Json(page);
+        }
+
+        [HttpPost("userprofile")]
+        public IActionResult UserProfile([FromForm] string cookies, [FromForm] string userId)
+        {
+            AssertLoggedIn(cookies);
+
+            var user = pixiv.GetUserProfile(userId);
+            user.Avatar = GetLocalProxyImageUrl(user.Avatar);
+
+            return Json(user);
         }
 
         [HttpGet("imagebyurl/{**url}")]
@@ -127,6 +189,58 @@ namespace Controllers
             }
             
             return File(stream, type, fileName);
+        }
+
+        //API部分
+
+        [HttpPost("followuser")]
+        public IActionResult FollowUser([FromForm] string cookies, [FromForm] string userId)
+        {
+            AssertLoggedIn(cookies);
+
+            pixiv.FollowUser(userId);
+
+            return Ok();
+        }
+
+        [HttpPost("unfollowuser")]
+        public IActionResult UnFollowUser([FromForm] string cookies, [FromForm] string userId)
+        {
+            AssertLoggedIn(cookies);
+
+            pixiv.UnFollowUser(userId);
+
+            return Ok();
+        }
+
+        [HttpPost("bookmarkillust")]
+        public IActionResult BookmarkIllustration([FromForm] string cookies, [FromForm] string illustId)
+        {
+            AssertLoggedIn(cookies);
+
+            var bookid = pixiv.BookmarkIllustration(illustId);
+
+            return Ok(bookid);
+        }
+
+        [HttpPost("unbookmarkillust")]
+        public IActionResult UnBookmarkIllustration([FromForm] string cookies, [FromForm] string bookId)
+        {
+            AssertLoggedIn(cookies);
+
+            pixiv.UnBookmarkIllustration(bookId);
+
+            return Ok();
+        }
+
+        [HttpPost("likeillust")]
+        public IActionResult LikeIllustration([FromForm] string cookies, [FromForm] string illustId)
+        {
+            AssertLoggedIn(cookies);
+
+            pixiv.LikeIllustration(illustId);
+
+            return Ok();
         }
 
         private void AssertLoggedIn(string cookies)

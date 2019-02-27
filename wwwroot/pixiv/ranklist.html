@@ -81,6 +81,7 @@
     <script src="./js/vue.min.js"></script>
     <script src="./js/vue-resource.min.js"></script>
     <script src="./js/vue-components/modal.js"></script>
+    <script src="./js/vue-components/profile.js"></script>
     <script src="./js/vue-components/list.js"></script>
     <script src="./js/vue-components/carousel.js"></script>
     <script src="./js/vue-components/listandcarousel.js"></script>
@@ -146,6 +147,7 @@ window.onload = function() {
                             href: config.getIllustPageUrl(i.id),
                             src: i.thumbnail,
                             title: i.title,
+                            user: mergeObj(i.user, {href: config.getUserIllustsPageUrl(i.user.id)}),
                         })
                     });
                     this.imgs = imgs;

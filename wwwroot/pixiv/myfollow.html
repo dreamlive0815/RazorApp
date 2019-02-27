@@ -106,44 +106,43 @@ window.onload = function() {
         },
         methods: {
             init: function() {
-                this.loadBookmarkNewIllusts(this.getPageId());
+                this.loadMyFollowUsers(this.getPageId());
             },
             getPlayer: function() {
                 return this.$refs.listandcarousel;
             },
-            loadBookmarkNewIllusts: function(pageId) {
+            loadMyFollowUsers: function(pageId) {
                 this.headText = '加载中...';
                 this.imgs = [];
                 this.hasPrevPage = this.hasNextPage = false;
                 var params = mergeObj(getBasePostParams(), {
                     pageId: pageId,
                 });
-                this.$http.post(config.getBookmarkNewIllustsApiUrl(), params, {emulateJSON:true}).then(function(res) {
+                this.$http.post(config.getMyFollowApiUrl(), params, {emulateJSON:true}).then(function(res) {
                     var json = res.body;
-                    var illusts = json.illustrations;
+                    var users = json.users;
                     var imgs = [];
-                    illusts.forEach(i => {
+                    users.forEach(i => {
                         imgs.push({
-                            href: config.getIllustPageUrl(i.id),
-                            src: i.thumbnail,
-                            title: i.title,
-                            user: mergeObj(i.user, {href: config.getUserIllustsPageUrl(i.user.id)}),
+                            href: config.getUserIllustsPageUrl(i.id),
+                            src: i.avatar,
+                            title: i.name,
                         })
                     });
                     this.imgs = imgs;
                     this.hasPrevPage = json.hasPrevPage;
                     this.hasNextPage = json.hasNextPage;
-                    headText = '[关注用户的新作品]第' + pageId + '页';
+                    headText = '[关注的用户]第' + pageId + '页';
                     this.headText = headText;
                 }, ajaxErrorHandler);
             },
             prevPage: function(pageId) {
                 console.log('prev', pageId);
-                this.loadBookmarkNewIllusts(pageId);
+                this.loadMyFollowUsers(pageId);
             },
             nextPage: function(pageId) {
                 console.log('next', pageId);
-                this.loadBookmarkNewIllusts(pageId);
+                this.loadMyFollowUsers(pageId);
             },
             slideStart: function() {
                 this.headText = '翻页中...';
@@ -159,7 +158,7 @@ window.onload = function() {
             },
             setPageId(pageId) {
                 this.getPlayer().setPageId(pageId);
-                this.loadBookmarkNewIllusts(pageId);
+                this.loadMyFollowUsers(pageId);
             },
             resetList() {
                 this.getPlayer().resetList();

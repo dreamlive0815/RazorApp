@@ -706,9 +706,12 @@ namespace Crawler.Pixiv
             return $"{BaseUri}/rpc/get_profile.php?user_ids={idS}&illust_num={DefaultUsersProfileIllustNumber}&novel_num={DefaultUsersProfileNovelNumber}";
         }
 
-        public Dictionary<string, User> GetUserProfile(string userId)
+        public User GetUserProfile(string userId)
         {
-            return GetUsersProfile(new string[] { userId });
+            var dic = GetUsersProfile(new string[] { userId });
+            if (!dic.ContainsKey(userId))
+                throw new Exception("用户不存在");
+            return dic[userId];
         }
 
         public Dictionary<string, User> GetUsersProfile(IEnumerable<string> userIds)
@@ -769,7 +772,21 @@ namespace Crawler.Pixiv
             return request;
         }
 
-        public void BookmarkIllustration(string illustId)
+        public string GetModifyBookmarkIllustrationPageUrl(string illustId, bool isPublic = true)
+        {
+            var rest = isPublic ? "show" : "hide";
+            return $"{BaseUri}/bookmark_add.php?illust_id={illustId}&rest={rest}&type=illust&p=1";
+        }
+
+        public string GetBookId(string illustId, bool isPublic = true)
+        {
+            var s = _client.GetString(_client.BuildRequest(GetModifyBookmarkIllustrationPageUrl(illustId, isPublic)));
+
+            var id = s.XPathSingleAttr("//input[@name='book_id[]']", "value");
+            return id;
+        }
+
+        public string BookmarkIllustration(string illustId)
         {
             AssertLoggedIn();
 
@@ -779,6 +796,8 @@ namespace Crawler.Pixiv
             if (obj == null)
                 throw new Exception("解析关注用户操作的返回信息出错");
             AssertOKJsonResult(obj);
+
+            return GetBookId(illustId);
         }
 
         public Request GetUnBookmarkIllustrationRequest(string bookId, bool isPublic = true)

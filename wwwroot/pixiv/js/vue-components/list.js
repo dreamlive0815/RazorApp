@@ -39,6 +39,7 @@ Vue.component('list', {
 <div class="container" :style="{display:visible ? \'block\' : \'none\' }">\
     <div class="row">\
         <div v-for="item in imgs" class="col-xs-12 col-sm-6 col-md-4">\
+            <profile v-if="item.user != undefined" :user="item.user" :enablefollowstate="false" :container="false" :bottommargin="false"></profile>\
             <div class="thumbnail">\
                 <img class="img-responsive" style="width:100%;" :src="item.src" alt="">\
                 <a class="btn btn-primary btn-block" :href="item.href" target="_blank">{{ item.title }}</a>\

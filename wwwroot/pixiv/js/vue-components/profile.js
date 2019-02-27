@@ -24,22 +24,38 @@ Vue.component('profile', {
             type: Boolean,
             default: true,
         },
+        container: {
+            type: Boolean,
+            default: true,
+        },
+        bottommargin: {
+            type: Boolean,
+            default: true,
+        }
     },
     template: '\
-<div class="container" v-if="visible">\
-    <div class="thumbnail">\
-        <img class="img-responsive" :src="user.avatar"></img>\
-        <p class="centerp"><a target="_blank">{{ user.name }}</a></p>\
-        <button class="btn btn-block" v-if="enablefollowstate" :class="{\'btn-primary\':user.follow}" @click="switchFollowState">{{ user.follow ? \'关注中\' : \'未关注\' }}</button>\
+<div :class="{container:container}" v-if="visible">\
+    <div class="thumbnail" :style="style">\
+        <img v-if="user.avatar != undefined" class="img-responsive" :src="user.avatar"></img>\
+        <p class="centerp"><a :href="user.href" target="_blank">{{ user.name }}</a></p>\
+        <button class="btn btn-block" v-if="enablefollowstate" :class="{\'btn-primary\':user.follow}" @click="switchFollowStateHandler">{{ user.follow ? \'关注中\' : \'未关注\' }}</button>\
     </div>\
 </div>',
+    computed: { 
+        style() {
+            if(this.bottommargin)  
+                return {};
+            else
+                return {'margin-bottom':0};
+        },
+    },
     methods: {
-        switchFollowState() {
+        switchFollowStateHandler() {
             var user = this.user;
             if (user.follow)
-                this.$emit('ontryunfollow', user.id);
+                this.$emit('ontryunfollow', user.id, user.name);
             else
-                this.$emit('ontryfollow', user.id);
+                this.$emit('ontryfollow', user.id, user.name);
         },
     },
     mounted: function() {
