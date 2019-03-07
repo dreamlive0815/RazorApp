@@ -193,6 +193,16 @@ namespace Controllers
 
         //API部分
 
+        [HttpPost("comments")]
+        public IActionResult Comments([FromForm] string cookies, [FromForm] string illustId, [FromForm] int offset, [FromForm] int limit)
+        {
+            AssertLoggedIn(cookies);
+
+            var comments = pixiv.GetComments(illustId, offset, limit);
+
+            return Json(comments);
+        }
+
         [HttpPost("followuser")]
         public IActionResult FollowUser([FromForm] string cookies, [FromForm] string userId)
         {

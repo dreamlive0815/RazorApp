@@ -57,6 +57,7 @@
         <div id="detail" v-if="detailVisible" class="container">
             <ul class="list-group">
                 <li class="list-group-item">名称：{{ illust.title }}</li>
+                <li class="list-group-item">数量：{{ illust.count }}</li>
                 <li class="list-group-item">描述：{{ illust.description }}</li>
                 <li class="list-group-item">收藏：{{ illust.bookmarkCount }}</li>
                 <li class="list-group-item">喜欢：{{ illust.likeCount }}</li>
@@ -66,6 +67,28 @@
 
             <button class="btn btn-block" :disabled="illust.liked" :class="{'btn-primary':illust.liked}" @click="switchLikeState">{{ illust.liked ? '已赞' : '赞' }}</button>
             <button class="btn btn-block" :class="{'btn-primary':illust.bookmarked}" @click="switchBookmarkState">{{ illust.bookmarked ? '已收藏' : '添加收藏' }}</button>
+
+            <br />
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">评论</h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li v-for="(comment, index) in comments" class="list-group-item">
+                            <div class="list-inline">
+                                <img v-if="comment.isEmoji" :src="getEmojiUrlById(comment.text)">
+                                <span v-else>{{ comment.text }}</span>
+                                <span> [{{ comment.user.name }}] ({{ comment.time }})</span>
+                            </div>
+                            
+                        </li>
+                    </ul>
+                    <button class="btn btn-block btn-primary" :disabled="!hasMoreComments" @click="moreComments">更多</button>
+                </div>
+            </div> 
+
         </div>
 
         <br />
@@ -120,6 +143,8 @@ window.onload = function() {
     var query = getQueryParams();
     var illustId = query.id;
     console.log('illustId', illustId);
+
+    var isLoadingComments = false;
     
     var headText = config.defaultHeadText;
     var navs = config.defaultNavs;
@@ -152,8 +177,13 @@ window.onload = function() {
                 viewCount: 0,
                 tags: [],
             },
+            comments: [
+            ],
+            commentsOffset: 0,
+            commentsLimit: config.defaultCommentsPerPageCount,
             profileVisible: true,
             detailVisible: true,
+            hasMoreComments: true,
         },
         methods: {
             init: function() {
@@ -188,6 +218,33 @@ window.onload = function() {
                     headText = '[作品]';
                     this.headText = headText;
                 }, ajaxErrorHandler);
+                this.hasMoreComments = true;
+                this.moreComments();
+            },
+            loadComments: function(illustId, offset, limit) {
+                var that = this;
+                if (isLoadingComments) {
+                    console.log('有加载评论的任务正在进行');
+                    return;
+                }
+                isLoadingComments = true;
+                pixiv.api.getComments(illustId, offset, limit, function(res) {
+                    var json = res.body;
+                    var comments = json.comments;
+                    for (var i = 0; i < comments.length; i++) {
+                        that.comments.push(comments[i]);
+                    }
+                    that.commentsOffset += that.commentsLimit;
+                    that.hasMoreComments = json.hasNext;
+
+                    isLoadingComments = false;
+                }, ajaxErrorHandler);
+            },
+            moreComments: function() {
+                this.loadComments(this.illustId, this.commentsOffset, this.commentsLimit);
+            },
+            getEmojiUrlById: function(emojiId) {
+                return config.getEmojiUrlById(emojiId);
             },
             slideStart: function() {
                 this.headText = '翻页中...';

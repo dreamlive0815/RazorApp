@@ -9,6 +9,14 @@ config.js
 
 var pixiv = {
     api: {
+        getComments(illustId, offset, limit, okHandler, failHandler) {
+            var params = mergeObj(getBasePostParams(), {
+                illustId: illustId,
+                offset: offset,
+                limit: limit,
+            });
+            Vue.http.post(config.getCommentsApiUrl(), params, {emulateJSON:true}).then(okHandler, failHandler);
+        },
         getUserProfile(userId, okHandler, failHandler) {
             var params = mergeObj(getBasePostParams(), {
                 userId: userId,

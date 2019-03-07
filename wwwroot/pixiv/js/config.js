@@ -10,7 +10,11 @@ var config = {
     defaultNavs: [
         { name: '首页', link: './index.html' },
     ],
+    defaultCommentsPerPageCount: 10,
 
+    getCommentsApiUrl: function() {
+        return this.apiUrlPrefix + 'comments';
+    },
     getBookmarkIllustsApiUrl: function() {
         return this.apiUrlPrefix + 'bookmarkillusts';
     },
@@ -74,6 +78,10 @@ var config = {
     },
     getUserIllustsPageUrl: function(userId) {
         return this.pageUrlPrefix + 'userillusts.html?id=' + userId;
+    },
+
+    getEmojiUrlById: function(emojiId) {
+        return "https://s.pximg.net/common/images/stamp/generated-stamps/" + emojiId + "_s.jpg";
     }
 };
 

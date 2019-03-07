@@ -113,8 +113,8 @@ namespace Crawler.Pixiv
         /// 
         /// </summary>
         /// <param name="illustId"></param>
-        /// <param name="offset"></param>
-        /// <param name="limit">从0开始</param>
+        /// <param name="offset">从0开始</param>
+        /// <param name="limit"></param>
         /// <returns></returns>
         public CommentsPage GetComments(string illustId, int offset, int limit)
         {
@@ -138,15 +138,12 @@ namespace Crawler.Pixiv
             var comments = obj.JsonPath("$.body.comments[*]");
             foreach (var comment in comments) {
                 var emojiId = comment.Val<string>("stampId");
+                var replyToUserId = comment.Val<string>("replyToUserId");
                 var c = new Comment() {
                     HasReplies = comment.Val<bool>("hasReplies"),
                     Id = comment.Val<string>("id"),
                     IsEmoji = emojiId != null,
                     ParentId = comment.Val<string>("commentParentId"),
-                    ReplyTo = new User() {
-                        Id = comment.Val<string>("replyToUserId"),
-                        Name = comment.Val<string>("replyToUserName"),
-                    },
                     RootId = comment.Val<string>("commentRootId"),
                     Time = comment.Val<string>("commentDate"),
                     Text = comment.Val<string>("comment"),
@@ -156,8 +153,12 @@ namespace Crawler.Pixiv
                         Name = comment.Val<string>("userName"),
                     },
                 };
+                if (replyToUserId != null) c.ReplyTo = new User() {
+                    Id = replyToUserId,
+                    Name = comment.Val<string>("replyToUserName"),
+                };
                 if (c.IsEmoji) c.Text = emojiId;
-                page.Commnets.Add(c);
+                page.Comments.Add(c);
             }
 
             return page;
@@ -688,9 +689,9 @@ namespace Crawler.Pixiv
             var manga = obj.JsonPathKey("$.body.manga");
             if (manga.Count > 0) {
                 illusts.AddRange(manga);
-                illusts.Sort();
             }
-            illusts.Reverse();
+            //降序排序
+            illusts.Sort((a, b) => -a.CompareTo(b));
             
             return illusts;
         }
