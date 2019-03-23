@@ -72,6 +72,10 @@ namespace Controllers
                 },
             };
 
+            for (var i = 0; i < girls.Count; i++) {
+                girls[i].Avatar = GetFinalImageUrl(girls[i].Avatar);
+            }
+
             return Json(girls);
         }
 
@@ -147,10 +151,11 @@ namespace Controllers
         [HttpGet("imagewithurl/{**url}")]
         public IActionResult Image(string url)
         {
-            if(!Regex.IsMatch(url, "https://.+?/")) {
+            var pattern = "^https://.+?.onvshen.com:85";
+            if(!Regex.IsMatch(url, pattern)) {
                 return NotFound();
             }
-            var u = Regex.Replace(url, "https://.+?/", "");
+            var u = Regex.Replace(url, pattern, "");
             var matches = Regex.Matches(u, "\\d+");
             if(matches.Count == 0) {
                 return NotFound();
@@ -168,8 +173,8 @@ namespace Controllers
         /// <returns></returns>
         private string GetFinalImageUrl(string url)
         {
-            return url;
-            //return "/girl/imagewithurl/" + url;
+            //return url;
+            return "/girl/imagewithurl/" + url;
         }
     }
 }

@@ -77,12 +77,14 @@
                 <div class="panel-body">
                     <ul class="list-group">
                         <li v-for="(comment, index) in comments" class="list-group-item">
-                            <div class="list-inline">
-                                <img v-if="comment.isEmoji" :src="getEmojiUrlById(comment.text)">
-                                <span v-else>{{ comment.text }}</span>
-                                <span> [{{ comment.user.name }}] ({{ comment.time }})</span>
+                            <div v-if="comment.isEmoji" class="thumbnail" style="border: 0; margin: 0;">
+                                <img :src="getEmojiUrlById(comment.text)">
                             </div>
-                            
+                            <div v-else>
+                                <p class="centerp" style="color: blue;font-weight: bolder;">{{ comment.text }}</p>
+                            </div>
+                            <p class="centerp">{{ comment.user.name }}</p>
+                            <p class="centerp">{{ comment.time }}</p>
                         </li>
                     </ul>
                     <button class="btn btn-block btn-primary" :disabled="!hasMoreComments" @click="moreComments">更多</button>
@@ -264,8 +266,10 @@ window.onload = function() {
                 console.log('follow', userId);
                 if (!userId) return;
                 var that = this;
+                this.headText = '关注中...';
                 pixiv.api.followUser(userId, function (res) {
                     that.user.follow = true;
+                    that.headText = headText;
                 }, ajaxErrorHandler);
             },
             tryUnFollow(userId, userName) {
@@ -273,8 +277,10 @@ window.onload = function() {
                 if (!userId) return;
                 var that = this;
                 confirmHandler = function() {
+                    that.headText = '取消关注中...';
                     pixiv.api.unFollowUser(userId, function (res) {
                         that.user.follow = false;
+                        that.headText = headText;
                 }   , ajaxErrorHandler);
                 };
                 hiddenDiv.getModal().show('取消关注', '你确定要取消关注' + userName + '吗?');
@@ -290,8 +296,10 @@ window.onload = function() {
                 console.log('like', illustId);
                 if (!illustId) return;
                 var that = this;
+                this.headText = '点赞中...';
                 pixiv.api.likeIllust(illustId, function (res) {
                     that.illust.liked = true;
+                    that.headText = headText;
                 }, ajaxErrorHandler);
             },
             switchBookmarkState() {
@@ -306,10 +314,12 @@ window.onload = function() {
                 console.log('bookmarkIllust', illustId);
                 if (!illustId) return;
                 var that = this;
+                this.headText = '收藏中...';
                 pixiv.api.bookmarkIllust(illustId, function (res) {
                     var newbookid = res.body;
                     that.illust.bookmarkId = newbookid;
                     that.illust.bookmarked = true;
+                    that.headText = headText;
                 }, ajaxErrorHandler);
             },
             unBookmarkIllust(bookid, illustName) {
@@ -317,8 +327,10 @@ window.onload = function() {
                 if (!bookid) return;
                 var that = this;
                 confirmHandler = function() {
+                    that.headText = '取消收藏中...';
                     pixiv.api.unBookmarkIllust(bookid, function (res) {
                         that.illust.bookmarked = false;
+                        that.headText = headText;
                 }   , ajaxErrorHandler);
                 };
                 hiddenDiv.getModal().show('取消收藏', '你确定要取消收藏作品' + illustName + '吗?');

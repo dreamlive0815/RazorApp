@@ -172,7 +172,7 @@ namespace Controllers
         [HttpGet("imagebyurl/{**url}")]
         public IActionResult Image(string url)
         {
-            var match = Regex.Match(url, "^https://i.pximg.net.+/([^/]+\\.([^/]+))$");
+            var match = Regex.Match(url, "^https://..pximg.net.+/([^/]+\\.([^/]+))$");
             if(!match.Success) {
                 return NotFound();
             }

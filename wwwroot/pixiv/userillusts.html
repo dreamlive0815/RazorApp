@@ -201,8 +201,10 @@ window.onload = function() {
                 console.log('follow', userId);
                 if (!userId) return;
                 var that = this;
+                this.headText = '关注中...';
                 pixiv.api.followUser(userId, function (res) {
                     that.user.follow = true;
+                    that.headText = headText;
                 }, ajaxErrorHandler);
             },
             tryUnFollow(userId, userName) {
@@ -210,8 +212,10 @@ window.onload = function() {
                 if (!userId) return;
                 var that = this;
                 confirmHandler = function() {
+                    that.headText = '取消关注中...';
                     pixiv.api.unFollowUser(userId, function (res) {
                         that.user.follow = false;
+                        that.headText = headText;
                 }   , ajaxErrorHandler);
                 };
                 hiddenDiv.getModal().show('取消关注', '你确定要取消关注' + userName + '吗?');
