@@ -58,7 +58,7 @@ namespace Controllers
                 new GirlProfile() {
                     Avatar = "https://img.onvshen.com:85/girl/22162/22162.jpg",
                     Id = "22162",
-                    Name = "杨晨晨(sugar小甜心CC , sugar)",
+                    Name = "杨晨晨",
                 },
                 new GirlProfile() {
                     Avatar = "https://img.onvshen.com:85/girl/19705/19705.jpg",
@@ -69,6 +69,11 @@ namespace Controllers
                     Avatar = "https://img.onvshen.com:85/girl/21501/21501.jpg",
                     Id = "21501",
                     Name = "夏美酱",
+                },
+                new GirlProfile() {
+                    Avatar = "https://img.onvshen.com:85/girl/19411/19411.jpg",
+                    Id = "19411",
+                    Name = "米妮",
                 },
             };
 
@@ -163,6 +168,7 @@ namespace Controllers
             var fileName = string.Join("-", matches.Select(m => m.Value).Distinct());
             fileName = $"{fileName}.jpg";
             var stream = _client.GetStream(url);
+            
             return File(stream, "image/jpeg", fileName);
         }
 

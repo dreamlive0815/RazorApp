@@ -12,7 +12,7 @@ namespace Crawler.Girl
 {
     public class Girl
     {
-        public static string BaseUri { get { return "https://www.nvshens.com"; } }
+        public static string BaseUri { get { return "https://www.nvshens.org"; } }
 
         public static string GetCoverUrl(string girlId, string albumId)
         {
@@ -47,7 +47,8 @@ namespace Crawler.Girl
 
         public List<Album> GetAlbums(string girlId)
         {
-            var s = _client.GetString(_client.BuildRequest(GetAlbumsUrl(girlId)));
+            var url = GetAlbumsUrl(girlId);
+            var s = _client.GetString(_client.BuildRequest(url));
 
             var list = new List<Album>();
             var nodes = s.XPath("//div[@class='igalleryli_div']//img");
@@ -55,7 +56,8 @@ namespace Crawler.Girl
                 throw new Exception($"ID为{girlId}的模特作品不存在");
             var regex = new Regex("/(\\d+)/(\\d+)/cover/");
             foreach (var node in nodes) {
-                var src = node.GetAttributeValue("src", null);
+                var dataOri = node.GetAttributeValue("data-original", null);
+                var src = node.GetAttributeValue("src", dataOri);
                 var title = node.GetAttributeValue("title", null);
                 var match = regex.Match(src);
 
